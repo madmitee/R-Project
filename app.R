@@ -3,11 +3,16 @@ library(DT)
 library(ggplot2)
 library(plotly)
 library(dplyr)
-
+library(ggcorrplot)
 ## app.R ##
 library(shinydashboard)
-
-
+gtm <- read.csv(file = "mhdt.csv", header = T)
+gtm <- gtm[,-1]
+gtm$Year <- as.numeric(gtm$Year)
+gtm$Schizophrenia....<-as.numeric(gtm$Schizophrenia....)
+gtm$Schizophrenia....<-as.numeric(gtm$Schizophrenia....)
+gtm$Bipolar.disorder....<-as.numeric(gtm$Bipolar.disorder....)
+gtm$Eating.disorders....<-as.numeric(gtm$Eating.disorders....)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Basic dashboard"),
@@ -62,24 +67,28 @@ ui <- dashboardPage(
                        tags$br(),
                        tags$b("Alcohol use disorders(%) :")," Alkoholitarvitamise häiretega inimeste protsent selles riigis/regioonis selle aasta jooksul. (Float)",
                        tags$br())
-              ) 
+              ),
+              verbatimTextOutput("strfile"),
+              DT::dataTableOutput("mytable")
       ),
       # Second tab content
       tabItem(tabName = "matrix",
-              h2("Widgets tab content")
+              h2("Korrelatsionimatriks"),
+              plotOutput("mymatrix")
       )
     )
   )
 )
 
 server <- function(input, output) {
-  set.seed(122)
-  histdata <- rnorm(500)
+  # Andmed Page
+  output$strfile <- renderPrint({str(gtm)})
+  output$mytable = DT::renderDataTable({gtm})
+  #Matrix Page
+  gtmcorr <- round(cor(gtm[4:10]), 1)
+  output$mymatrix = renderPlot(ggcorrplot(gtmcorr[4:10]),method = "square")
   
-  output$plot1 <- renderPlot({
-    data <- histdata[seq_len(input$slider)]
-    hist(data)
-  })
+  
 }
 
 shinyApp(ui, server)
