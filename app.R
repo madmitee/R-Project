@@ -21,7 +21,8 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("Sissejuhatus", tabName = "sissejuhatus", icon = icon("dashboard")),
       menuItem("Andmed", tabName = "andmed", icon = icon("th")),
-      menuItem("Korrelatsionimatriks", tabName = "matrix", icon = icon("th"))
+      menuItem("Korrelatsionimatriks", tabName = "matrix", icon = icon("th")),
+      menuItem("Histogram", tabName = "matrix", icon = icon("th"))
     )
   ),
   ## Body content
@@ -71,10 +72,15 @@ ui <- dashboardPage(
               verbatimTextOutput("strfile"),
               DT::dataTableOutput("mytable")
       ),
-      # Second tab content
+      # matrix tab content
       tabItem(tabName = "matrix",
               h2("Korrelatsionimatriks"),
               plotOutput("mymatrix")
+      ),
+      # matrix tab content
+      tabItem(tabName = "hista",
+              h2("Histogram"),
+              plotOutput("plot1")
       )
     )
   )
@@ -84,9 +90,12 @@ server <- function(input, output) {
   # Andmed Page
   output$strfile <- renderPrint({str(gtm)})
   output$mytable = DT::renderDataTable({gtm})
+  
   #Matrix Page
-  gtmcorr <- round(cor(gtm[4:10]), 1)
-  output$mymatrix = renderPlot(ggcorrplot(gtmcorr[4:10]),method = "square")
+  output$mymatrix = renderPlot(ggcorrplot(gtm[3:10],method = "circle"))
+  output$plot1 = renderPlot(pairs.panels(gtm))
+  #hista page
+  
   
   
 }
