@@ -4,25 +4,33 @@ library(ggplot2)
 library(plotly)
 library(dplyr)
 library(ggcorrplot)
+library(skimr)
 ## app.R ##
 library(shinydashboard)
 gtm <- read.csv(file = "mhdt.csv", header = T)
 gtm <- gtm[,-1]
+gtm <- gtm[,-2]
+
+#gtm <- gtm[!is.na(gtm$Code),]
+skim(gtm)
 gtm$Year <- as.numeric(gtm$Year)
 gtm$Schizophrenia....<-as.numeric(gtm$Schizophrenia....)
 gtm$Schizophrenia....<-as.numeric(gtm$Schizophrenia....)
 gtm$Bipolar.disorder....<-as.numeric(gtm$Bipolar.disorder....)
 gtm$Eating.disorders....<-as.numeric(gtm$Eating.disorders....)
 
+country <- gtm[!duplicated(gtm$Entity),]
+
+
 ui <- dashboardPage(
-  dashboardHeader(title = "Basic dashboard"),
+  dashboardHeader(title = "Global Trends in Mental Health Disorder"),
   ## Sidebar content
   dashboardSidebar(
     sidebarMenu(
       menuItem("Sissejuhatus", tabName = "sissejuhatus", icon = icon("dashboard")),
       menuItem("Andmed", tabName = "andmed", icon = icon("th")),
       menuItem("Korrelatsionimatriks", tabName = "matrix", icon = icon("th")),
-      menuItem("Histogram", tabName = "matrix", icon = icon("th"))
+      menuItem("Histogram", tabName = "hista", icon = icon("th"))
     )
   ),
   ## Body content
@@ -76,11 +84,22 @@ ui <- dashboardPage(
       tabItem(tabName = "matrix",
               h2("Korrelatsionimatriks"),
               plotOutput("mymatrix")
+              
       ),
       # matrix tab content
       tabItem(tabName = "hista",
               h2("Histogram"),
-              plotOutput("plot1")
+              sidebarLayout(
+                sidebarPanel(
+                  
+                    selectInput("countryid",label = "Riik",country$Entity),
+                    selectInput("haigus", "Haigus", choices = names(country[3:9])),
+                  
+                ),
+                mainPanel(
+                  plotlyOutput(outputId = "countryplot")
+                ))
+              
       )
     )
   )
@@ -92,10 +111,10 @@ server <- function(input, output) {
   output$mytable = DT::renderDataTable({gtm})
   
   #Matrix Page
-  output$mymatrix = renderPlot(ggcorrplot(gtm[3:10],method = "circle"))
-  output$plot1 = renderPlot(pairs.panels(gtm))
-  #hista page
+  output$mymatrix = renderPlot(ggcorrplot(gtm[3:9],method = "circle"))
   
+  #hista page
+
   
   
 }
