@@ -30,7 +30,8 @@ ui <- dashboardPage(
       menuItem("Sissejuhatus", tabName = "sissejuhatus", icon = icon("dashboard")),
       menuItem("Andmed", tabName = "andmed", icon = icon("th")),
       menuItem("Korrelatsionimatriks", tabName = "matrix", icon = icon("th")),
-      menuItem("Histogram", tabName = "hista", icon = icon("th"))
+      menuItem("Histogram", tabName = "hista", icon = icon("th")),
+      menuItem("Maps", tabName = "maps", icon = icon("th"))
     )
   ),
   ## Body content
@@ -100,6 +101,20 @@ ui <- dashboardPage(
                   plotlyOutput(outputId = "countryplot")
                 ))
               
+      ),
+      tabItem(tabName = "maps",
+              h2("maps"),
+              sidebarLayout(
+                sidebarPanel(
+                  
+                  selectInput("countryid",label = "Riik",country$Entity),
+                  selectInput("haigus", "Haigus", choices = names(country[3:9])),
+                  
+                ),
+                mainPanel(
+                  plotlyOutput(outputId = "mapplot")
+                ))
+              
       )
     )
   )
@@ -114,6 +129,8 @@ server <- function(input, output) {
   output$mymatrix = renderPlot(ggcorrplot(gtm[3:9],method = "circle"))
   
   #hista page
+  
+  #maps page
 
   
   
